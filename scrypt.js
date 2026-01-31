@@ -1,17 +1,15 @@
-// Звуковой эффект при взятии
-const pickupSound = new Audio('sounds/pickup.mp3');
 
-// Находим все элементы
+
+
 const draggableItems = document.querySelectorAll('.left img, .right img');
 const bag = document.querySelector('.bag');
 
-// Переменные для перетаскивания
+
 let currentDraggedItem = null;
 let isDragging = false;
 let offsetX = 0;
 let offsetY = 0;
 
-// Функция для проверки, находится ли элемент в зоне сумки
 function isInDropZone(x, y) {
     const rect = bag.getBoundingClientRect();
     const tolerance = 50;
@@ -24,18 +22,17 @@ function isInDropZone(x, y) {
     );
 }
 
-// Функция для отображения завершающей картинки на месте сумки
+
 function showCompletionImage() {
-    // Получаем текущие размеры и позицию сумки
+
     const bagRect = bag.getBoundingClientRect();
     
-    // Создаем завершающую картинку
     const completionImage = document.createElement('img');
-    completionImage.src = 'images/completion.svg'; // ваша картинка при завершении
+    completionImage.src = 'images/completion.svg'; 
     completionImage.alt = 'Все предметы собраны!';
     completionImage.className = 'completion-image';
     
-    // Устанавливаем стили для позиционирования на месте сумки
+
     completionImage.style.cssText = `
         position: absolute;
         top: ${bagRect.top + window.scrollY}px;
@@ -47,14 +44,14 @@ function showCompletionImage() {
         animation: fadeInScale 0.8s ease-out;
     `;
     
-    // Скрываем оригинальную сумку
+
     bag.style.opacity = '0';
     bag.style.visibility = 'hidden';
     
-    // Добавляем картинку на страницу
+
     document.body.appendChild(completionImage);
     
-    // Добавляем стили для анимации
+
     const style = document.createElement('style');
     style.textContent = `
         @keyframes fadeInScale {
@@ -74,7 +71,7 @@ function showCompletionImage() {
     `;
     document.head.appendChild(style);
     
-    // Обновляем позицию при ресайзе окна
+
     window.addEventListener('resize', function repositionImage() {
         const newBagRect = bag.getBoundingClientRect();
         completionImage.style.top = `${newBagRect.top + window.scrollY}px`;
@@ -84,32 +81,27 @@ function showCompletionImage() {
     });
 }
 
-// Функция для проверки, все ли элементы собраны
 function checkAllItemsCollected() {
     const remainingItems = document.querySelectorAll('.left img, .right img');
     if (remainingItems.length === 0) {
         setTimeout(() => {
-            // Показываем завершающую картинку на месте сумки
             showCompletionImage();
         }, 100);
     }
 }
 
-// Функция для начала перетаскивания
+
 function startDragging(e, item) {
     e.preventDefault();
     
-    // Проигрываем звук
     pickupSound.currentTime = 0;
     pickupSound.play().catch(e => console.log("Ошибка воспроизведения звука:", e));
     
     currentDraggedItem = item;
     isDragging = true;
-    
-    // Получаем позицию элемента
+
     const rect = item.getBoundingClientRect();
-    
-    // Рассчитываем смещение
+
     let clientX, clientY;
     if (e.type === 'touchstart') {
         clientX = e.touches[0].clientX;
@@ -122,14 +114,14 @@ function startDragging(e, item) {
     offsetX = clientX - rect.left;
     offsetY = clientY - rect.top;
     
-    // Визуальные эффекты
+
     item.style.opacity = '0.7';
     item.style.cursor = 'grabbing';
     item.style.position = 'fixed';
     item.style.zIndex = '1000';
 }
 
-// Функция для перемещения элемента
+
 function moveDraggedItem(e) {
     if (!isDragging || !currentDraggedItem) return;
     
@@ -145,29 +137,28 @@ function moveDraggedItem(e) {
         clientY = e.clientY;
     }
     
-    // Рассчитываем новые координаты
+
     let newLeft = clientX - offsetX;
     let newTop = clientY - offsetY;
     
-    // Ограничиваем движение в пределах окна
+
     const maxLeft = window.innerWidth - currentDraggedItem.offsetWidth;
     const maxTop = window.innerHeight - currentDraggedItem.offsetHeight;
     
     newLeft = Math.max(0, Math.min(newLeft, maxLeft));
     newTop = Math.max(0, Math.min(newTop, maxTop));
-    
-    // Применяем координаты
+
     currentDraggedItem.style.left = `${newLeft}px`;
     currentDraggedItem.style.top = `${newTop}px`;
 }
 
-// Функция для завершения перетаскивания
+
 function stopDragging(e) {
     if (!isDragging || !currentDraggedItem) return;
     
     isDragging = false;
     
-    // Получаем позицию сброса
+
     let dropX, dropY;
     if (e.type === 'touchend') {
         dropX = e.changedTouches[0].clientX;
@@ -177,15 +168,14 @@ function stopDragging(e) {
         dropY = e.clientY;
     }
     
-    // Проверяем, помещен ли в сумку
+
     if (isInDropZone(dropX, dropY)) {
-        // Просто удаляем элемент (без анимации исчезновения)
+
         if (currentDraggedItem.parentNode) {
             currentDraggedItem.parentNode.removeChild(currentDraggedItem);
             checkAllItemsCollected();
         }
     } else {
-        // Возвращаем элемент на место (без анимации возврата)
         currentDraggedItem.style.opacity = '1';
         currentDraggedItem.style.position = '';
         currentDraggedItem.style.zIndex = '';
@@ -197,28 +187,24 @@ function stopDragging(e) {
     currentDraggedItem = null;
 }
 
-// Инициализация
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем обработчики для каждого элемента
     draggableItems.forEach(item => {
         item.style.cursor = 'grab';
         
-        // Мышь
+
         item.addEventListener('mousedown', (e) => startDragging(e, item));
         
-        // Касание
         item.addEventListener('touchstart', (e) => startDragging(e, item), { passive: false });
     });
     
-    // Обработчики перемещения
+
     document.addEventListener('mousemove', moveDraggedItem);
     document.addEventListener('touchmove', moveDraggedItem, { passive: false });
     
-    // Обработчики завершения
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
     
-    // Предотвращаем стандартное поведение
     document.addEventListener('dragstart', (e) => e.preventDefault());
 });
 
