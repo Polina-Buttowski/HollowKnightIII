@@ -1,4 +1,5 @@
 
+const pickupSound = new Audio('sounds/pickup.mp3');
 
 
 const draggableItems = document.querySelectorAll('.left img, .right img');
@@ -9,6 +10,7 @@ let currentDraggedItem = null;
 let isDragging = false;
 let offsetX = 0;
 let offsetY = 0;
+
 
 function isInDropZone(x, y) {
     const rect = bag.getBoundingClientRect();
@@ -22,11 +24,11 @@ function isInDropZone(x, y) {
     );
 }
 
-
 function showCompletionImage() {
 
     const bagRect = bag.getBoundingClientRect();
     
+
     const completionImage = document.createElement('img');
     completionImage.src = 'images/completion.svg'; 
     completionImage.alt = 'Все предметы собраны!';
@@ -94,6 +96,7 @@ function checkAllItemsCollected() {
 function startDragging(e, item) {
     e.preventDefault();
     
+
     pickupSound.currentTime = 0;
     pickupSound.play().catch(e => console.log("Ошибка воспроизведения звука:", e));
     
@@ -114,7 +117,7 @@ function startDragging(e, item) {
     offsetX = clientX - rect.left;
     offsetY = clientY - rect.top;
     
-
+ 
     item.style.opacity = '0.7';
     item.style.cursor = 'grabbing';
     item.style.position = 'fixed';
@@ -147,7 +150,7 @@ function moveDraggedItem(e) {
     
     newLeft = Math.max(0, Math.min(newLeft, maxLeft));
     newTop = Math.max(0, Math.min(newTop, maxTop));
-
+     
     currentDraggedItem.style.left = `${newLeft}px`;
     currentDraggedItem.style.top = `${newTop}px`;
 }
@@ -176,6 +179,7 @@ function stopDragging(e) {
             checkAllItemsCollected();
         }
     } else {
+
         currentDraggedItem.style.opacity = '1';
         currentDraggedItem.style.position = '';
         currentDraggedItem.style.zIndex = '';
@@ -189,22 +193,22 @@ function stopDragging(e) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+
     draggableItems.forEach(item => {
         item.style.cursor = 'grab';
         
-
         item.addEventListener('mousedown', (e) => startDragging(e, item));
         
+
         item.addEventListener('touchstart', (e) => startDragging(e, item), { passive: false });
     });
     
-
     document.addEventListener('mousemove', moveDraggedItem);
     document.addEventListener('touchmove', moveDraggedItem, { passive: false });
     
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
-    
+
     document.addEventListener('dragstart', (e) => e.preventDefault());
 });
 
