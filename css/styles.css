@@ -1,0 +1,124 @@
+body{
+    background-image: url(../images/background.svg);
+}
+
+#bagscreen{
+    width: 100%;
+    height: 700px;
+}
+
+img{
+    width: 250px;
+    height: 250px;
+}
+.left{
+    display: flex;
+    flex-direction: column;
+}
+
+.right{
+    display: flex;
+    flex-direction: column;
+}
+
+.bag{
+    display: flex;
+    align-self: center;
+    width: 500px;
+    height: 500px;
+}
+
+.items{
+    display: flex;
+    justify-content: space-between;
+}
+
+#game{
+    width: 100%;
+    height: 1700px;
+    position: relative
+}
+
+.poster{
+    position: absolute;
+    top: 500px;
+    left: 500px;    
+}
+
+.graymouse{
+    position: absolute;
+    top: 170px;
+}
+
+.HollowKnight{
+    position: absolute;
+    top: 1700px;
+}
+
+.pinkmouse{
+    position: absolute;
+    top: 1300px;
+    left: 700px;    
+}
+
+
+.mouses, .ticket {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.happy {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 400px;
+    height: auto;
+    max-width: 90vw;
+}
+
+.date {
+    position: absolute; 
+    top: 800px;
+    left: 900px; 
+    display: block;
+    width: 250px; 
+    height: 250px;
+    z-index: 1; 
+}
+
+.ale{
+    position: absolute; 
+    top: 190px;
+    left: 1000px; 
+}
+
+.mouses {
+    width: 600px;
+    height: auto;
+    max-width: 90vw;
+}
+
+.ticket {
+    width: 300px;
+    height: auto;
+    
+}
+
+.freddy {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 400px;
+    height: auto;
+    max-width: 90vw;
+}
