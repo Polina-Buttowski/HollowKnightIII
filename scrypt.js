@@ -1,228 +1,185 @@
-
-const pickupSound = new Audio('sounds/pickup.mp3');
-
-
-const draggableItems = document.querySelectorAll('.left img, .right img');
-const bag = document.querySelector('.bag');
-
-
-let currentDraggedItem = null;
-let isDragging = false;
-let offsetX = 0;
-let offsetY = 0;
-
-
-function isInDropZone(x, y) {
-    const rect = bag.getBoundingClientRect();
-    const tolerance = 50;
-    
-    return (
-        x >= rect.left - tolerance &&
-        x <= rect.right + tolerance &&
-        y >= rect.top - tolerance &&
-        y <= rect.bottom + tolerance
-    );
-}
-
-function showCompletionImage() {
-
-    const bagRect = bag.getBoundingClientRect();
-    
-
-    const completionImage = document.createElement('img');
-    completionImage.src = 'images/completion.svg'; 
-    completionImage.alt = 'Все предметы собраны!';
-    completionImage.className = 'completion-image';
-    
-
-    completionImage.style.cssText = `
-        position: absolute;
-        top: ${bagRect.top + window.scrollY}px;
-        left: ${bagRect.left + window.scrollX}px;
-        width: ${bagRect.width}px;
-        height: ${bagRect.height}px;
-        object-fit: contain;
-        z-index: 10;
-        animation: fadeInScale 0.8s ease-out;
-    `;
-    
-
-    bag.style.opacity = '0';
-    bag.style.visibility = 'hidden';
-    
-
-    document.body.appendChild(completionImage);
-    
-
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .completion-image {
-            pointer-events: none;
-        }
-    `;
-    document.head.appendChild(style);
-    
-
-    window.addEventListener('resize', function repositionImage() {
-        const newBagRect = bag.getBoundingClientRect();
-        completionImage.style.top = `${newBagRect.top + window.scrollY}px`;
-        completionImage.style.left = `${newBagRect.left + window.scrollX}px`;
-        completionImage.style.width = `${newBagRect.width}px`;
-        completionImage.style.height = `${newBagRect.height}px`;
-    });
-}
-
-function checkAllItemsCollected() {
-    const remainingItems = document.querySelectorAll('.left img, .right img');
-    if (remainingItems.length === 0) {
-        setTimeout(() => {
-            showCompletionImage();
-        }, 100);
-    }
-}
-
-
-function startDragging(e, item) {
-    e.preventDefault();
-    
-
-    pickupSound.currentTime = 0;
-    pickupSound.play().catch(e => console.log("Ошибка воспроизведения звука:", e));
-    
-    currentDraggedItem = item;
-    isDragging = true;
-
-    const rect = item.getBoundingClientRect();
-
-    let clientX, clientY;
-    if (e.type === 'touchstart') {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    
-    offsetX = clientX - rect.left;
-    offsetY = clientY - rect.top;
-    
- 
-    item.style.opacity = '0.7';
-    item.style.cursor = 'grabbing';
-    item.style.position = 'fixed';
-    item.style.zIndex = '1000';
-}
-
-
-function moveDraggedItem(e) {
-    if (!isDragging || !currentDraggedItem) return;
-    
-    e.preventDefault();
-    
-    let clientX, clientY;
-    
-    if (e.type === 'touchmove') {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
-    }
-    
-
-    let newLeft = clientX - offsetX;
-    let newTop = clientY - offsetY;
-    
-
-    const maxLeft = window.innerWidth - currentDraggedItem.offsetWidth;
-    const maxTop = window.innerHeight - currentDraggedItem.offsetHeight;
-    
-    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-    newTop = Math.max(0, Math.min(newTop, maxTop));
-     
-    currentDraggedItem.style.left = `${newLeft}px`;
-    currentDraggedItem.style.top = `${newTop}px`;
-}
-
-
-function stopDragging(e) {
-    if (!isDragging || !currentDraggedItem) return;
-    
-    isDragging = false;
-    
-
-    let dropX, dropY;
-    if (e.type === 'touchend') {
-        dropX = e.changedTouches[0].clientX;
-        dropY = e.changedTouches[0].clientY;
-    } else {
-        dropX = e.clientX;
-        dropY = e.clientY;
-    }
-    
-
-    if (isInDropZone(dropX, dropY)) {
-
-        if (currentDraggedItem.parentNode) {
-            currentDraggedItem.parentNode.removeChild(currentDraggedItem);
-            checkAllItemsCollected();
-        }
-    } else {
-
-        currentDraggedItem.style.opacity = '1';
-        currentDraggedItem.style.position = '';
-        currentDraggedItem.style.zIndex = '';
-        currentDraggedItem.style.left = '';
-        currentDraggedItem.style.top = '';
-        currentDraggedItem.style.cursor = 'grab';
-    }
-    
-    currentDraggedItem = null;
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
 
+    const pickupSound = new Audio('sounds/pickup.mp3');
+    const draggableItems = document.querySelectorAll('.left img, .right img');
+    const bag = document.querySelector('.bag');
+
+    let currentDraggedItem = null;
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function isInDropZone(x, y) {
+        const rect = bag.getBoundingClientRect();
+        const tolerance = 50;
+        
+        return (
+            x >= rect.left - tolerance &&
+            x <= rect.right + tolerance &&
+            y >= rect.top - tolerance &&
+            y <= rect.bottom + tolerance
+        );
+    }
+
+    function showCompletionImage() {
+        const bagRect = bag.getBoundingClientRect();
+        const completionImage = document.createElement('img');
+        completionImage.src = 'images/completion.svg'; 
+        completionImage.alt = 'Все предметы собраны!';
+        completionImage.className = 'completion-image';
+        
+        completionImage.style.cssText = `
+            position: absolute;
+            top: ${bagRect.top + window.scrollY}px;
+            left: ${bagRect.left + window.scrollX}px;
+            width: ${bagRect.width}px;
+            height: ${bagRect.height}px;
+            object-fit: contain;
+            z-index: 10;
+            animation: fadeInScale 0.8s ease-out;
+        `;
+        
+        bag.style.opacity = '0';
+        bag.style.visibility = 'hidden';
+        document.body.appendChild(completionImage);
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInScale {
+                from {
+                    opacity: 0;
+                    transform: scale(0.5);
+                }
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            .completion-image {
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        window.addEventListener('resize', function repositionImage() {
+            const newBagRect = bag.getBoundingClientRect();
+            completionImage.style.top = `${newBagRect.top + window.scrollY}px`;
+            completionImage.style.left = `${newBagRect.left + window.scrollX}px`;
+            completionImage.style.width = `${newBagRect.width}px`;
+            completionImage.style.height = `${newBagRect.height}px`;
+        });
+    }
+
+    function checkAllItemsCollected() {
+        const remainingItems = document.querySelectorAll('.left img, .right img');
+        if (remainingItems.length === 0) {
+            setTimeout(() => {
+                showCompletionImage();
+            }, 100);
+        }
+    }
+
+    function startDragging(e, item) {
+        e.preventDefault();
+        
+        pickupSound.currentTime = 0;
+        pickupSound.play().catch(e => console.log("Ошибка воспроизведения звука:", e));
+        
+        currentDraggedItem = item;
+        isDragging = true;
+        const rect = item.getBoundingClientRect();
+
+        let clientX, clientY;
+        if (e.type === 'touchstart') {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+        
+        item.style.opacity = '0.7';
+        item.style.cursor = 'grabbing';
+        item.style.position = 'fixed';
+        item.style.zIndex = '1000';
+    }
+
+    function moveDraggedItem(e) {
+        if (!isDragging || !currentDraggedItem) return;
+        
+        e.preventDefault();
+        
+        let clientX, clientY;
+        
+        if (e.type === 'touchmove') {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        let newLeft = clientX - offsetX;
+        let newTop = clientY - offsetY;
+        
+        const maxLeft = window.innerWidth - currentDraggedItem.offsetWidth;
+        const maxTop = window.innerHeight - currentDraggedItem.offsetHeight;
+        
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+        
+        currentDraggedItem.style.left = `${newLeft}px`;
+        currentDraggedItem.style.top = `${newTop}px`;
+    }
+
+    function stopDragging(e) {
+        if (!isDragging || !currentDraggedItem) return;
+        
+        isDragging = false;
+        
+        let dropX, dropY;
+        if (e.type === 'touchend') {
+            dropX = e.changedTouches[0].clientX;
+            dropY = e.changedTouches[0].clientY;
+        } else {
+            dropX = e.clientX;
+            dropY = e.clientY;
+        }
+        
+        if (isInDropZone(dropX, dropY)) {
+            if (currentDraggedItem.parentNode) {
+                currentDraggedItem.parentNode.removeChild(currentDraggedItem);
+                checkAllItemsCollected();
+            }
+        } else {
+            currentDraggedItem.style.opacity = '1';
+            currentDraggedItem.style.position = '';
+            currentDraggedItem.style.zIndex = '';
+            currentDraggedItem.style.left = '';
+            currentDraggedItem.style.top = '';
+            currentDraggedItem.style.cursor = 'grab';
+        }
+        
+        currentDraggedItem = null;
+    }
+
+    // Настройка перетаскивания предметов
     draggableItems.forEach(item => {
         item.style.cursor = 'grab';
-        
         item.addEventListener('mousedown', (e) => startDragging(e, item));
-        
-
         item.addEventListener('touchstart', (e) => startDragging(e, item), { passive: false });
     });
     
     document.addEventListener('mousemove', moveDraggedItem);
     document.addEventListener('touchmove', moveDraggedItem, { passive: false });
-    
     document.addEventListener('mouseup', stopDragging);
     document.addEventListener('touchend', stopDragging);
-
     document.addEventListener('dragstart', (e) => e.preventDefault());
-});
 
-
-
-
-
-
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
+    // === ЧАСТЬ 2: ИГРА С ПЕРСОНАЖЕМ ===
     function playSound(soundFile) {
         try {
             const sound = new Audio(soundFile);
@@ -236,9 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const graymouse = document.querySelector('.graymouse');
     const poster = document.querySelector('.poster');
     const dateImage = document.querySelector('.date');
-    const aleImage = document.querySelector('.ale'); // Ale в игре
+    const aleImage = document.querySelector('.ale');
     const happyImage = document.querySelector('.happy');
-    const freddyImage = document.querySelector('.freddy'); // Freddy попап
+    const freddyImage = document.querySelector('.freddy');
     const gameArea = document.getElementById('game');
     const mousesImage = document.querySelector('.mouses');
     const ticketImage = document.querySelector('.ticket');
@@ -247,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isGraymouseEventTriggered = false;
     let isPosterEventTriggered = false;
     let isDateEventTriggered = false;
-    let isAleEventTriggered = false; // Новое состояние для ale
+    let isAleEventTriggered = false;
     
     let playerX = 0;
     let playerY = 1700;
